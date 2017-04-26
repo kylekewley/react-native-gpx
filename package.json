@@ -1,0 +1,20 @@
+{
+  "name": "react-native-gpx",
+  "version": "0.1",
+  "description": "Library for parsing and generating GPX files",
+  "main": "index.js",
+  "repository": "https://github.com/kylekewley/react-native-gpx",
+  "author": "Kyle Kewley",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest --verbose"
+  },
+  "dependencies": {
+    "libxmljs": "^0.18.4"
+  },
+  "devDependencies": {
+    "babel-jest": "^19.0.0",
+    "babel-preset-es2015": "^6.24.1",
+    "jest": "^19.0.2"
+  }
+}
