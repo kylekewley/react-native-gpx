@@ -1,17 +1,13 @@
 var libxmljs = require("libxmljs");
 
 export default class GPXDocument {
-  constructor() {
-    this.parsedGPX = undefined;
-  }
 
   /**
-   * Parse the xml string and store the results internally
+   * Parse the gpx xml string and store the results internally
    * @param {string} xmlString The xml string to parse
    */
-  parseGPXString(xmlString) {
+  constructor(xmlString) {
     this.parsedGPX = libxmljs.parseXmlString(xmlString, {recover: true});
-    return this;
   }
 
   /**
@@ -22,7 +18,7 @@ export default class GPXDocument {
       return [];
     }
 
-    return this.parsedGPX.find('/gpxns:gpx/gpxns:trk/gpxns:name', GPXDocument.GPX_NS).map((val) => {
+    return this.parsedGPX.find('/ns:gpx/ns:trk/ns:name', GPXDocument.GPX_NS).map((val) => {
       if (val) return val.text();
       return 'No Name';
     });
@@ -42,4 +38,4 @@ export default class GPXDocument {
 
 // The mean radius of the earth in miles
 GPXDocument.MEAN_RAD_MI = 3958.7613;
-GPXDocument.GPX_NS = { gpxns: 'http://www.topografix.com/GPX/1/1' };
+GPXDocument.GPX_NS = { ns: 'http://www.topografix.com/GPX/1/1' };

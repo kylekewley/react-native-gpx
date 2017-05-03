@@ -18,7 +18,7 @@ const CASectionA = loadXMLFile('./test/gpxfiles/CA_Sec_A_tracks.gpx');
 
 test('Test parser constructor', () => {
   let testString = '<test>hi</test>';
-  let gpx = new GPXDocument().parseGPXString(testString);
+  let gpx = new GPXDocument(testString);
 
   let root = gpx.parsedGPX.root();
 
@@ -27,14 +27,14 @@ test('Test parser constructor', () => {
 });
 
 test('Validate xml file', () => {
-  let gpx = new GPXDocument().parseGPXString(ElCap);
-  let gpxxsd = new GPXDocument().parseGPXString(xsd);
+  let gpx = new GPXDocument(ElCap);
+  let gpxxsd = new GPXDocument(xsd);
 
   expect(gpx.parsedGPX.validate(gpxxsd.parsedGPX)).toBe(true);
 });
 
 test('Get track names', () => {
-  let sectionA = new GPXDocument().parseGPXString(CASectionA);
+  let sectionA = new GPXDocument(CASectionA);
 
   expect(sectionA.getTrackNames()).toEqual(['CA Sec A',
     'CA Sec A - 3rd Gate Trail',
