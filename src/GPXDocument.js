@@ -1,5 +1,7 @@
 var libxmljs = require("libxmljs");
 
+import GPXTrack from './GPXTrack.js';
+
 export default class GPXDocument {
 
   /**
@@ -11,30 +13,20 @@ export default class GPXDocument {
   }
 
   /**
-   * Get the track names for all tracks in the gpx file
+   * Get the tracks for all tracks in the gpx file
    */
-  getTrackNames() {
+  getTracks() {
     return new Promise((resolve, reject) => {
-      let tracks = this.parsedGPX.find('/ns:gpx/ns:trk/ns:name', GPXDocument.GPX_NS);
+      let tracks = this.parsedGPX.find('/ns:gpx/ns:trk', GPXDocument.GPX_NS);
 
       if (tracks === undefined)
-        reject("Unable to read track names");
+        reject("Unable read tracks");
 
       // Use the map function to get an array with the name of each track if it exists
       resolve(tracks.map((val) => {
-        return val === undefined ? 'No Name' : val.text();
+        return val === undefined ? undefined : new GPXTrack(val);
       }));
     });
-  }
-
-  /**
-   * Get the node's text value or return the default text value if the
-   * node does not exist
-   */
-  _getTextOrDefault(node, xpath, defaultValue) {
-    var search = node.get(xpath);
-
-    return search === null ? defaultValue : search.text();
   }
 }
 

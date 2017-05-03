@@ -36,8 +36,8 @@ test('Validate xml file', () => {
 it('Get track names', () => {
   let sectionA = new GPXDocument(CASectionA);
 
-  return sectionA.getTrackNames().then(data => {
-    expect(data).toEqual(['CA Sec A',
+  return sectionA.getTracks().then(data => {
+    expect(data.map(trk => trk.getName())).toEqual(['CA Sec A',
       'CA Sec A - 3rd Gate Trail',
       'CA Sec A - CRHT Trail',
       'CA Sec A - Chariot Canyon Road',
@@ -45,5 +45,21 @@ it('Get track names', () => {
       'CA Sec A - Rodriguez Spring Road',
       'CA Sec A - Sunrise Trailhead Trail'
     ]);
+  });
+});
+
+test('Get segment lengths', (done) => {
+  let sectionA = new GPXDocument(CASectionA);
+
+  sectionA.getTracks().then(tracks => {
+    tracks[0].getSegmentLengths().then(lengths => {
+      expect(Math.floor(lengths[0]/1000)).toEqual(168);
+      done();
+    }).catch(err => {
+      console.log(err);
+      done();
+    });
+  }).catch(err => {
+    done();
   });
 });
