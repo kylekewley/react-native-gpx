@@ -33,18 +33,17 @@ test('Validate xml file', () => {
   expect(gpx.parsedGPX.validate(gpxxsd.parsedGPX)).toBe(true);
 });
 
-test('Get track names', () => {
+it('Get track names', () => {
   let sectionA = new GPXDocument(CASectionA);
 
-  expect(sectionA.getTrackNames()).toEqual(['CA Sec A',
-    'CA Sec A - 3rd Gate Trail',
-    'CA Sec A - CRHT Trail',
-    'CA Sec A - Chariot Canyon Road',
-    'CA Sec A - Kitchen Creek Falls Trail',
-    'CA Sec A - Rodriguez Spring Road',
-    'CA Sec A - Sunrise Trailhead Trail'
-  ]);
-
-
-  //expect(sectionA.getTrackNames()).toBe([]);
+  return sectionA.getTrackNames().then(data => {
+    expect(data).toEqual(['CA Sec A',
+      'CA Sec A - 3rd Gate Trail',
+      'CA Sec A - CRHT Trail',
+      'CA Sec A - Chariot Canyon Road',
+      'CA Sec A - Kitchen Creek Falls Trail',
+      'CA Sec A - Rodriguez Spring Road',
+      'CA Sec A - Sunrise Trailhead Trail'
+    ]);
+  });
 });

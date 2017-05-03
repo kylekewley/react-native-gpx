@@ -14,15 +14,17 @@ export default class GPXDocument {
    * Get the track names for all tracks in the gpx file
    */
   getTrackNames() {
-    if (this.parsedGPX === undefined) {
-      return [];
-    }
+    return new Promise((resolve, reject) => {
+      let tracks = this.parsedGPX.find('/ns:gpx/ns:trk/ns:name', GPXDocument.GPX_NS);
 
-    return this.parsedGPX.find('/ns:gpx/ns:trk/ns:name', GPXDocument.GPX_NS).map((val) => {
-      if (val) return val.text();
-      return 'No Name';
+      if (tracks === undefined)
+        reject("Unable to read track names");
+
+      // Use the map function to get an array with the name of each track if it exists
+      resolve(tracks.map((val) => {
+        return val === undefined ? 'No Name' : val.text();
+      }));
     });
-
   }
 
   /**
