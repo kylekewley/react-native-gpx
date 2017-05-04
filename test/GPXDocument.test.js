@@ -48,18 +48,11 @@ it('Get track names', () => {
   });
 });
 
-test('Get segment lengths', (done) => {
+test('Get segment lengths', async () => {
   let sectionA = new GPXDocument(CASectionA);
+  let track = (await sectionA.getTracks())[0];
 
-  sectionA.getTracks().then(tracks => {
-    tracks[0].getSegmentLengths().then(lengths => {
-      expect(Math.floor(lengths[0]/1000)).toEqual(168);
-      done();
-    }).catch(err => {
-      console.log(err);
-      done();
-    });
-  }).catch(err => {
-    done();
-  });
+  let firstTrackLengths = await track.getSegmentLengths();
+  expect(Math.floor(firstTrackLengths[0]/1000)).toEqual(168);
+
 });

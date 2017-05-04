@@ -2,6 +2,7 @@
 export default class GPXTrack {
   constructor(track) {
     this.track = track;
+    this.trackInfo = undefined;
   }
 
   /**
@@ -16,23 +17,38 @@ export default class GPXTrack {
     return nameNode[0].text();
   }
 
+  /*
+  loadTrackInfo() {
+    if (this.trackInfo !== undefined)
+      return new Promise(resolve => resolve(this.trackInfo));
+
+    return new Promise((resolve, reject) => {
+      var segments = this._getTrackSegments();
+      var lengths = this._getSegmentLengths();
+      Promise.all([lengths]).then(values => {
+        this.trackInfo = 
+      });
+    });
+  }
+*/
+
+
   /**
    * Returns a promise that resolves to an array of track segment lengths. All
    * lengths are returned in meters.
    */
-  getSegmentLengths() {
-    return new Promise((resolve, reject) => {
-      let segments = this.track.find('ns:trkseg', GPXTrack.GPX_NS);
+  async getSegmentLengths() {
+    let segments = await this._getTrackSegments();
+    if (segments === undefined) throw 'Unable to find track segments';
 
-      if (segments === undefined) reject('Unable to find track segments');
-
-      console.log('segments: ', segments.length);
-      resolve(segments.map(this._getSegmentLength.bind(this)));
-
-    });
+    return await Promise.all(segments.map(this._getSegmentLength.bind(this)));
   }
 
-  _getSegmentLength(segment) {
+  async _getTrackSegments() {
+    return this.track.find('ns:trkseg', GPXTrack.GPX_NS);
+  }
+
+  async _getSegmentLength(segment) {
     let points = segment.find('ns:trkpt', GPXTrack.GPX_NS);
 
     let lastCartesianPoint = undefined;

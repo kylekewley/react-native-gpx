@@ -15,17 +15,15 @@ export default class GPXDocument {
   /**
    * Get the tracks for all tracks in the gpx file
    */
-  getTracks() {
-    return new Promise((resolve, reject) => {
-      let tracks = this.parsedGPX.find('/ns:gpx/ns:trk', GPXDocument.GPX_NS);
+  async getTracks() {
+    let tracks = this.parsedGPX.find('/ns:gpx/ns:trk', GPXDocument.GPX_NS);
 
-      if (tracks === undefined)
-        reject("Unable read tracks");
+    if (tracks === undefined)
+      throw "Unable read tracks";
 
-      // Use the map function to get an array with the name of each track if it exists
-      resolve(tracks.map((val) => {
-        return val === undefined ? undefined : new GPXTrack(val);
-      }));
+    // Use the map function to get an array with the name of each track if it exists
+    return tracks.map((val) => {
+      return val === undefined ? undefined : new GPXTrack(val);
     });
   }
 }
