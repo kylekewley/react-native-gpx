@@ -50,9 +50,19 @@ it('Get track names', () => {
 
 test('Get segment lengths', async () => {
   let sectionA = new GPXDocument(CASectionA);
-  let track = (await sectionA.getTracks())[0];
+  let track = await sectionA.getTracks();
 
-  let firstTrackLengths = await track.getSegmentLengths();
-  expect(Math.floor(firstTrackLengths[0]/1000)).toEqual(168);
+  let segLength = (await track[0].loadAllSegmentInfo())[0];
+  let segLength2 = (await track[1].loadAllSegmentInfo())[0];
 
+  expect(Math.floor(segLength.totalDistance/1000)).toEqual(168);
+  expect(Math.floor(segLength.totalElevationGain)).toEqual(6215);
+  expect(Math.floor(segLength.totalElevationLoss)).toEqual(6176);
+
+  expect(Math.floor(segLength2.totalDistance)).toEqual(915);
+  expect(Math.floor(segLength2.totalElevationGain)).toEqual(7);
+  expect(Math.floor(segLength2.totalElevationLoss)).toEqual(67);
+});
+
+test('Get nearest coordinate from distance', async () => {
 });

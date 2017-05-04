@@ -29,25 +29,25 @@ export default class GPXTrack {
     return this.trackInfo;
   }
 
-  async _loadSegmentInfo(segment) {
+  async _loadSegmentInfo() {
     let points = segment.find('ns:trkpt', GPXTrack.GPX_NS);
 
     let distAcc = {
-      totalDistance: 0.0,
+      totalDistance: 0,
       lastCartesianPoint: undefined
     };
 
     let eleAcc = {
-      totalElevationGain: 0.0,
-      totalElevationLoss: 0.0,
+      totalElevationGain: 0,
+      totalElevationLoss: 0,
       previousElevation: undefined
     };
 
     points.forEach(trkpt => {
       let pointData = this._coordinateDataFromTrackPoint(trkpt);
 
-      distAcc = this._accumulateTrackLength(distAcc, pointData);
-      eleAcc = this._accumulateTrackElevation(eleAcc, pointData);
+      distAcc = _accumulateTrackLength(distAcc, pointData);
+      eleAcc = _accumulateTrackElevation(eleAcc, pointData);
     });
 
     return {
