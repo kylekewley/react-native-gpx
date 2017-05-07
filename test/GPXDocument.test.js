@@ -68,12 +68,24 @@ test('Get nearest coordinate from distance', async () => {
   let sectionA = new GPXDocument(CASectionA);
   let track0 = (await sectionA.getTracks())[0];
 
-  expect((await track0.getPointAtDistance(0, 1160)).closestPointIndex).toEqual(19);
+  expect((await track0.getPointAtDistance(1160, 0)).closestPointIndex).toEqual(19);
   expect((await track0.getPointAtDistance(0, 0)).closestPointIndex).toEqual(0);
-  expect((await track0.getPointAtDistance(0, 1356.2285044239877)).closestPointIndex).toEqual(21);
+  expect((await track0.getPointAtDistance(1356.2285044239877, 0)).closestPointIndex).toEqual(21);
 
-  expect(await testAsync(track0.getPointAtDistance.bind(track0, 0, -10))).toEqual(new Error('Distance is out of bounds of point array'));
-  expect(await testAsync(track0.getPointAtDistance.bind(track0, 0, 99999999))).toEqual(new Error('Distance is out of bounds of point array'));
+  expect(await testAsync(track0.getPointAtDistance.bind(track0, -10, 0))).toEqual(new Error('Distance is out of bounds of point array'));
+  expect(await testAsync(track0.getPointAtDistance.bind(track0, 99999999, 0))).toEqual(new Error('Distance is out of bounds of point array'));
+
+});
+
+test('Find nearest in track', async () => {
+  let sectionA = new GPXDocument(CASectionA);
+  let track0 = (await sectionA.getTracks())[0];
+
+  // Test an exact point match on the track
+  expect((await track0.findNearestInTrack([-116.51676, 32.68602], 0))[0]).toEqual({ distance: 0, key: '783' });
+
+  // Test a point that is slightly off track
+  expect((await track0.findNearestInTrack([-116.4819, 33.1285], 0))[0].key).toEqual('2658');
 
 });
 
