@@ -19,7 +19,7 @@ export default class GPXDocument {
     let tracks = this.parsedGPX.find('/ns:gpx/ns:trk', GPXDocument.GPX_NS);
 
     if (tracks === undefined)
-      throw "Unable read tracks";
+      throw new Error('Unable read tracks');
 
     // Use the map function to get an array with the name of each track if it exists
     return tracks.map((val) => {

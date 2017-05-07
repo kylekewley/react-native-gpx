@@ -65,4 +65,22 @@ test('Get segment lengths', async () => {
 });
 
 test('Get nearest coordinate from distance', async () => {
+  let sectionA = new GPXDocument(CASectionA);
+  let track0 = (await sectionA.getTracks())[0];
+
+  expect((await track0.getPointAtDistance(0, 1160))).toEqual(19);
+  expect((await track0.getPointAtDistance(0, 0))).toEqual(0);
+
+  expect(await testAsync(track0.getPointAtDistance.bind(track0, 0, -10))).toEqual(new Error('Distance is out of bounds of point array'));
+  expect(await testAsync(track0.getPointAtDistance.bind(track0, 0, 99999999))).toEqual(new Error('Distance is out of bounds of point array'));
+
+  expect((await track0.getPointAtDistance(0, 1356.2285044239877))).toEqual(21);
 });
+
+async function testAsync(promiseFn) {
+  try {
+    return await promiseFn();
+  }catch (e) {
+    return e;
+  }
+}

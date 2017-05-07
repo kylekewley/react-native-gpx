@@ -17,16 +17,63 @@ export default class GPXTrack {
     return nameNode[0].text();
   }
 
+  async getPointAtDistance(segIdx, dist) {
+    let segInfo = await this.loadAllSegmentInfo();
+
+    if (segIdx >= segInfo.length) {
+      throw new Error(`There is no track segment at index ${segIdx}`);
+    }
+
+    return this._getPointAtDistance(segInfo[segIdx].points, dist);
+  }
+
   async loadAllSegmentInfo() {
     if (this.trackInfo !== undefined)
-      return trackInfo;
+      return this.trackInfo;
 
     let segments = await this._getTrackSegments();
-    if (segments === undefined) throw 'Unable to find track segments';
+    if (segments === undefined) throw new Error('Unable to find track segments');
 
     this.trackInfo =  await Promise.all(segments.map(this._loadSegmentInfo.bind(this)));
 
     return this.trackInfo;
+  }
+
+  _getPointAtDistance(ptArray, distance) {
+    if (ptArray.length === 0) throw new Error('Point array must have at least one element');
+
+    let upperBound = ptArray.length - 1;
+    let lowerBound = 0;
+    let searchIndex = Math.floor(upperBound / 2);
+
+    // Loop until lowerBound is one index below upperBound
+    while (lowerBound + 1 < upperBound) {
+      // Search point is too far on the path
+      if (ptArray[searchIndex].distance > distance) {
+        upperBound = searchIndex;
+      }else if (ptArray[searchIndex].distance < distance) {
+        lowerBound = searchIndex;
+      }else if (ptArray[searchIndex].distance === distance) {
+        // Found an exact match
+        lowerBound = upperBound = searchIndex;
+      }
+
+      searchIndex = Math.floor((upperBound - lowerBound) / 2 + lowerBound);
+    }
+
+    // We now have two points. Find out which one is closest
+    if (distance < ptArray[lowerBound].distance || distance > ptArray[upperBound].distance) {
+      throw new Error('Distance is out of bounds of point array');
+    }
+
+    let distanceFromLower = distance - ptArray[lowerBound].distance;
+    let distanceFromUpper = ptArray[upperBound].distance - distance;
+
+    if (distanceFromLower < distanceFromUpper) return lowerBound;
+    return upperBound;
+  }
+
+  _getSurroundingPoints(ptArray, distance) {
   }
 
   async _loadSegmentInfo(segment) {
@@ -48,9 +95,15 @@ export default class GPXTrack {
 
       distAcc = this._accumulateTrackLength(distAcc, pointData);
       eleAcc = this._accumulateTrackElevation(eleAcc, pointData);
+
+      // Cache the values with the track point
+      trkpt.distance = distAcc.totalDistance;
+      trkpt.totalGain = eleAcc.totalElevationGain;
+      trkpt.totalLoss = eleAcc.totalElevationLoss;
     });
 
     return {
+      points: points,
       totalDistance: distAcc.totalDistance,
       totalElevationGain: eleAcc.totalElevationGain,
       totalElevationLoss: eleAcc.totalElevationLoss
