@@ -151,7 +151,7 @@ export default class GPXTrack {
 
   _accumulateTrackLength(acc, currentPoint) {
     // Calculate the distance from the previous point and current point
-    distance = geolib.getDistanceSimple(acc.lastPoint, currentPoint);
+    distance = geolib.getDistance(acc.lastPoint, currentPoint);
 
     // Add the distance to the value in the accumulator
     acc.totalDistance += distance;
