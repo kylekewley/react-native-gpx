@@ -40,6 +40,24 @@ export default class GPXTrack {
   }
 
   _getPointAtDistance(ptArray, distance) {
+    // We now have two points. Find out which one is closest
+    let [lowerBound, upperBound] = this._getSurroundingPoints(ptArray, distance);
+
+    let lowPoint = ptArray[lowerBound];
+    let highPoint = ptArray[upperBound];
+    let distanceFromLower = distance - lowPoint.distance;
+    let distanceFromUpper = ptArray[upperBound].distance - distance;
+
+    // Extrapolate the lat/lon/alt based on the distance between the nearest points
+    let distanceBetweenPoints = this._toCartesianPoints(this._coordinateDataFromTrackPoint(lowPoint));
+    console.log(distanceBetweenPoints, this._coordinateDataFromTrackPoint(lowPoint));
+
+
+    if (distanceFromLower < distanceFromUpper) return lowerBound;
+    return upperBound;
+  }
+
+  _getSurroundingPoints(ptArray, distance) {
     if (ptArray.length === 0) throw new Error('Point array must have at least one element');
 
     let upperBound = ptArray.length - 1;
@@ -61,19 +79,11 @@ export default class GPXTrack {
       searchIndex = Math.floor((upperBound - lowerBound) / 2 + lowerBound);
     }
 
-    // We now have two points. Find out which one is closest
     if (distance < ptArray[lowerBound].distance || distance > ptArray[upperBound].distance) {
       throw new Error('Distance is out of bounds of point array');
     }
 
-    let distanceFromLower = distance - ptArray[lowerBound].distance;
-    let distanceFromUpper = ptArray[upperBound].distance - distance;
-
-    if (distanceFromLower < distanceFromUpper) return lowerBound;
-    return upperBound;
-  }
-
-  _getSurroundingPoints(ptArray, distance) {
+    return [lowerBound, upperBound];
   }
 
   async _loadSegmentInfo(segment) {
@@ -187,7 +197,7 @@ export default class GPXTrack {
     var sinLat = Math.sin(lat * DEG_TO_RAD);
     var cosLon = Math.cos(lon * DEG_TO_RAD);
     var sinLon = Math.sin(lon * DEG_TO_RAD);
-    var rad = 6378137.0;
+    var rad = 6371008.0;
     var f = 1.0 / 298.257224;
     var C = 1.0 / Math.sqrt(cosLat * cosLat + (1 - f) * (1 - f) * sinLat * sinLat);
     var S = (1.0 - f) * (1.0 - f) * C;

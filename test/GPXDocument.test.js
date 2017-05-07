@@ -59,7 +59,7 @@ test('Get segment lengths', async () => {
   expect(Math.floor(segLength.totalElevationGain)).toEqual(6215);
   expect(Math.floor(segLength.totalElevationLoss)).toEqual(6176);
 
-  expect(Math.floor(segLength2.totalDistance)).toEqual(915);
+  expect(Math.floor(segLength2.totalDistance)).toEqual(914);
   expect(Math.floor(segLength2.totalElevationGain)).toEqual(7);
   expect(Math.floor(segLength2.totalElevationLoss)).toEqual(67);
 });
