@@ -1,3 +1,4 @@
+var geolib = require('geolib');
 
 export default class GPXTrack {
   constructor(track) {
@@ -51,14 +52,12 @@ export default class GPXTrack {
     // Extrapolate the lat/lon/alt based on the distance between the nearest points
     let lowCoord = this._coordinateDataFromTrackPoint(lowPoint);
     let highCoord = this._coordinateDataFromTrackPoint(highPoint);
-    let lowCart = this._toCartesianPoints(lowCoord);
-    let highCart = this._toCartesianPoints(highCoord);
 
     let estimatedCoordinate = undefined;
     if (lowPoint === highPoint) {
       estimatedCoordinate = lowCoord;
     }else {
-      let distanceBetween = this._segmentDistance(lowCart, highCart);
+      let distanceBetween = geolib.getDistance(lowCoord, highCoord);
       let percentAfter = distanceFromLower / distanceBetween;
 
       let coordDiff = [highCoord[0] - lowCoord[0], highCoord[1] - lowCoord[1], highCoord[2] - lowCoord[2]];
@@ -109,15 +108,20 @@ export default class GPXTrack {
   async _loadSegmentInfo(segment) {
     let points = segment.find('ns:trkpt', GPXTrack.GPX_NS);
 
+    let firstPoint = undefined;
+    if (points.length > 0) {
+      firstPoint = this._coordinateDataFromTrackPoint(points[0]);
+    }
+
     let distAcc = {
       totalDistance: 0.0,
-      lastCartesianPoint: undefined
+      lastPoint: firstPoint
     };
 
     let eleAcc = {
       totalElevationGain: 0.0,
       totalElevationLoss: 0.0,
-      previousElevation: undefined
+      previousElevation: firstPoint[2]
     };
 
     points.forEach(trkpt => {
@@ -146,16 +150,13 @@ export default class GPXTrack {
   }
 
   _accumulateTrackLength(acc, currentPoint) {
-    // Convert the lat/lon/alt to a cartesian coordinate system
-    let currentCartesianPoint = this._toCartesianPoints(currentPoint);
-
     // Calculate the distance from the previous point and current point
-    distance = this._segmentDistance(acc.lastCartesianPoint, currentCartesianPoint);
+    distance = geolib.getDistanceSimple(acc.lastPoint, currentPoint);
 
     // Add the distance to the value in the accumulator
     acc.totalDistance += distance;
     // Set the last point in the accumulator for the next run
-    acc.lastCartesianPoint = currentCartesianPoint;
+    acc.lastPoint = currentPoint;
 
     // Return the updated accumulator for the next run
     return acc;
@@ -200,44 +201,8 @@ export default class GPXTrack {
       }
     }
 
-    return [lat, lon, alt];
+    return [lon, lat, alt];
   }
 
-  /**
-   * Takes the [latitude, longitude, altitude] as pointData and converts
-   * them to catesian points. Returns an array [x, y, z]
-   */
-  _toCartesianPoints(pointData) {
-    var lat = pointData[0];
-    var lon = pointData[1];
-    var alt = pointData[2];
-
-    const DEG_TO_RAD = Math.PI / 180.0;
-    var cosLat = Math.cos(lat * DEG_TO_RAD);
-    var sinLat = Math.sin(lat * DEG_TO_RAD);
-    var cosLon = Math.cos(lon * DEG_TO_RAD);
-    var sinLon = Math.sin(lon * DEG_TO_RAD);
-    var rad = 6371008.0;
-    var f = 1.0 / 298.257224;
-    var C = 1.0 / Math.sqrt(cosLat * cosLat + (1 - f) * (1 - f) * sinLat * sinLat);
-    var S = (1.0 - f) * (1.0 - f) * C;
-
-    let x = (rad * C + alt) * cosLat * cosLon;
-    let y = (rad * C + alt) * cosLat * sinLon;
-    let z = (rad * S + alt) * sinLat;
-
-    return [x, y, z];
-  }
-
-  /**
-   * Takes the cartesian points in R_3 and returns a distance value.
-   * returns zero if pt1 or pt2 is undefined.
-   */
-  _segmentDistance(pt1, pt2) {
-    if (pt1 === undefined || pt2 === undefined) {
-      return 0;
-    }
-    return Math.sqrt(Math.pow(pt2[0] - pt1[0], 2) + Math.pow(pt2[1] - pt1[1], 2) + Math.pow(pt2[2] - pt1[2], 2));
-  }
 }
 GPXTrack.GPX_NS = { ns: 'http://www.topografix.com/GPX/1/1' };
