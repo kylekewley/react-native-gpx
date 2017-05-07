@@ -24,7 +24,7 @@ export default class GPXTrack {
       throw new Error(`There is no track segment at index ${segIdx}`);
     }
 
-    return this._getPointAtDistance(segInfo[segIdx].points, dist);
+    return this._getPointAtDistance(segInfo[segIdx].points, dist).closestPointIndex;
   }
 
   async loadAllSegmentInfo() {
@@ -49,12 +49,32 @@ export default class GPXTrack {
     let distanceFromUpper = ptArray[upperBound].distance - distance;
 
     // Extrapolate the lat/lon/alt based on the distance between the nearest points
-    let distanceBetweenPoints = this._toCartesianPoints(this._coordinateDataFromTrackPoint(lowPoint));
-    console.log(distanceBetweenPoints, this._coordinateDataFromTrackPoint(lowPoint));
+    let lowCoord = this._coordinateDataFromTrackPoint(lowPoint);
+    let highCoord = this._coordinateDataFromTrackPoint(highPoint);
+    let lowCart = this._toCartesianPoints(lowCoord);
+    let highCart = this._toCartesianPoints(highCoord);
+
+    let estimatedCoordinate = undefined;
+    if (lowPoint === highPoint) {
+      estimatedCoordinate = lowCoord;
+    }else {
+      let distanceBetween = this._segmentDistance(lowCart, highCart);
+      let percentAfter = distanceFromLower / distanceBetween;
+
+      let coordDiff = [highCoord[0] - lowCoord[0], highCoord[1] - lowCoord[1], highCoord[2] - lowCoord[2]];
+      estimatedCoordinate = [
+        coordDiff[0] * percentAfter + lowCoord[0],
+        coordDiff[1] * percentAfter + lowCoord[1],
+        coordDiff[2] * percentAfter + lowCoord[2]
+      ];
+    }
 
 
-    if (distanceFromLower < distanceFromUpper) return lowerBound;
-    return upperBound;
+    let closest = distanceFromLower < distanceFromUpper ? lowerBound : upperBound;
+
+    return { closestPointIndex: closest,
+      estimatedCoordinate
+    };
   }
 
   _getSurroundingPoints(ptArray, distance) {
