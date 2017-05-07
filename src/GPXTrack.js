@@ -24,7 +24,7 @@ export default class GPXTrack {
       throw new Error(`There is no track segment at index ${segIdx}`);
     }
 
-    return this._getPointAtDistance(segInfo[segIdx].points, dist).closestPointIndex;
+    return this._getPointAtDistance(segInfo[segIdx].points, dist);
   }
 
   async loadAllSegmentInfo() {
